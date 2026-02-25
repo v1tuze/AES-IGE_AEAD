@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aes_ige_aead"
+version = "1.0.0"
+description = "AES-IGE-AEAD: Authenticated encryption (fast CPython C extension)"
+readme = "README.md"
+license = {text = "Public Domain"}
+requires-python = ">=3.7"
+
+[tool.setuptools]
+py-modules = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = []
