@@ -8,7 +8,7 @@ CFLAGS = -Wall -Wextra -std=c99 -Iinclude -O2
 LDFLAGS =
 
 SRCS = src/sha256.c src/aes.c src/gf128.c src/aes_ige.c src/poly_mac.c src/aes_ige_aead.c \
-       src/chacha20.c src/poly1305.c src/chacha20_poly1305.c
+       src/chacha20.c src/poly1305.c src/chacha20_poly1305.c src/deoxys_bc.c src/deoxys.c
 OBJS = $(SRCS:.c=.o)
 LIB_STATIC = libaes_ige_aead.a
 LIB_SHARED = libaes_ige_aead.so
@@ -49,4 +49,4 @@ clean:
 install: static
 	install -d $(PREFIX)/lib $(PREFIX)/include
 	install -m 644 $(LIB_STATIC) $(PREFIX)/lib/
-	install -m 644 include/aes_ige_aead.h $(PREFIX)/include/
+	install -m 644 include/*.h $(PREFIX)/include/

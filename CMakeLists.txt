@@ -6,6 +6,7 @@ set(CMAKE_C_STANDARD 99)
 set(SOURCES
     src/sha256.c src/aes.c src/gf128.c src/aes_ige.c src/poly_mac.c src/aes_ige_aead.c
     src/chacha20.c src/poly1305.c src/chacha20_poly1305.c
+    src/deoxys_bc.c src/deoxys.c
 )
 
 add_library(aes_ige_aead ${SOURCES})

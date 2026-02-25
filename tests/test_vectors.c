@@ -12,6 +12,7 @@
 #include "poly_mac.h"
 #include "aes_ige_aead.h"
 #include "chacha20_poly1305.h"
+#include "deoxys.h"
 
 #define TEST(name) do { \
     int _r = name(); \
@@ -150,6 +151,62 @@ static int test_chacha20_poly1305_auth_fail(void) {
     return plen >= 0;
 }
 
+/* Deoxys-I-128 - roundtrip */
+static int test_deoxys_i_128(void) {
+    const uint8_t key[16] = {0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f};
+    const uint8_t nonce[8] = {0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27};
+    const uint8_t plaintext[32] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,
+                                   0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f};
+    uint8_t ct[64], pt[64];
+    int clen, plen;
+    clen = deoxys_i_128_encrypt(key, nonce, NULL, 0, plaintext, 32, ct);
+    if (clen != 48) return 1;
+    plen = deoxys_i_128_decrypt(key, nonce, NULL, 0, ct, clen, pt);
+    if (plen != 32 || memcmp(pt, plaintext, 32) != 0) return 1;
+    return 0;
+}
+
+/* Deoxys-I-256 - roundtrip */
+static int test_deoxys_i_256(void) {
+    uint8_t key[32], nonce[8], plaintext[64], ct[96], pt[96];
+    int clen, plen;
+    memset(key, 0x11, 32);
+    memset(nonce, 0x22, 8);
+    memset(plaintext, 0x33, 64);
+    clen = deoxys_i_256_encrypt(key, nonce, NULL, 0, plaintext, 64, ct);
+    if (clen != 80) return 1;
+    plen = deoxys_i_256_decrypt(key, nonce, NULL, 0, ct, clen, pt);
+    if (plen != 64 || memcmp(pt, plaintext, 64) != 0) return 1;
+    return 0;
+}
+
+/* Deoxys-II-128 - roundtrip */
+static int test_deoxys_ii_128(void) {
+    uint8_t key[16], nonce[15], plaintext[64], ct[96], pt[96];
+    int clen, plen;
+    memset(key, 0x11, 16);
+    memset(nonce, 0x22, 15);
+    memset(plaintext, 0x33, 32);
+    clen = deoxys_ii_128_encrypt(key, nonce, NULL, 0, plaintext, 32, ct);
+    if (clen != 48) return 1;
+    plen = deoxys_ii_128_decrypt(key, nonce, NULL, 0, ct, clen, pt);
+    return (plen != 32 || memcmp(pt, plaintext, 32) != 0);
+}
+
+/* Deoxys-II-256 - roundtrip */
+static int test_deoxys_ii_256(void) {
+    uint8_t key[32], nonce[15], plaintext[33], ct[64], pt[64];
+    int clen, plen;
+    memset(key, 0x11, 32);
+    memset(nonce, 0x22, 15);
+    memset(plaintext, 0x33, 33);
+    clen = deoxys_ii_256_encrypt(key, nonce, NULL, 0, plaintext, 33, ct);
+    if (clen != 49) return 1;
+    plen = deoxys_ii_256_decrypt(key, nonce, NULL, 0, ct, clen, pt);
+    if (plen != 33 || memcmp(pt, plaintext, 33) != 0) return 1;
+    return 0;
+}
+
 static int test_aead_auth_fail_key(void) {
     uint8_t key1[32], key2[32], iv[32], ct[128], pt[64];
     memset(key1, 1, 32);
@@ -199,6 +256,10 @@ int main(void) {
     TEST(test_aead_auth_fail_key);
     TEST(test_chacha20_poly1305_roundtrip);
     TEST(test_chacha20_poly1305_auth_fail);
+    TEST(test_deoxys_i_128);
+    TEST(test_deoxys_i_256);
+    TEST(test_deoxys_ii_128);
+    TEST(test_deoxys_ii_256);
     printf("=======================\n");
     printf("%s: %d failed\n", failed ? "FAIL" : "PASS", failed);
     return failed ? 1 : 0;
